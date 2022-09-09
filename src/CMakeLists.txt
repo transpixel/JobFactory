@@ -5,16 +5,6 @@ message("##### Constructing local_LIBTARGET: " ${local_LIBTARGET})
 set(local_NSs
 
 	sys
-	io
-	dat
-
-	math
-	ga
-	la
-	geo
-	prob
-
-	cam
 
 	)
 

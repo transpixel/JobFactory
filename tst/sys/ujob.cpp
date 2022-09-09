@@ -33,14 +33,61 @@
 
 #include "libsys/job.h"
 
-#include "libdat/info.h"
-#include "libdat/dat.h"
-#include "libio/sprintf.h"
-#include "libio/stream.h"
-
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+namespace io
+{
+	//! String of specified width
+	std::string
+	stringFor
+		( std::size_t const & ival
+		, std::size_t const & numDigits
+		)
+	{
+		std::ostringstream oss;
+		oss << std::setw(numDigits) << std::setfill('0') << ival;
+		return oss.str();
+	}
+
+	//! Display type with number of spaces
+	template <typename Type>
+	inline
+	std::string
+	infoString
+		( Type const & value
+		, std::string const & title = {}
+		, std::size_t const & valueSize = 16u
+		, std::size_t const & titleSize = 12u
+		)
+	{
+		std::ostringstream oss;
+		oss
+			<< std::setw(titleSize) << title
+			<< " "
+			<< std::setw(valueSize) << value
+			;
+		return oss.str();
+	}
+
+}
+
+namespace dat
+{
+	//! True if the two sizes have same value (==)
+	inline
+	bool
+	nearlyEquals
+		( std::size_t const & sizeGot
+		, std::size_t const & sizeRef
+		)
+	{
+		return (sizeGot == sizeRef);
+	}
+
+} // dat
 
 
 namespace
@@ -121,8 +168,8 @@ sys_job_test1
 	if (! dat::nearlyEquals(gotCount, expCount))
 	{
 		oss << "Failure of factory jobDumb count test" << std::endl;
-		oss << dat::infoString(expCount, "expCount") << std::endl;
-		oss << dat::infoString(gotCount, "gotCount") << std::endl;
+		oss << io::infoString(expCount, "expCount") << std::endl;
+		oss << io::infoString(gotCount, "gotCount") << std::endl;
 	}
 
 	return oss.str();
@@ -135,7 +182,7 @@ sys_job_test1
 		JobSlow
 			( size_t const & id
 			)
-			: JobBase{ io::sprintf("JobSlow-%03d", id) }
+			: JobBase{ "JobSlow-" + io::stringFor(id, 3u) }
 		{}
 
 		virtual
@@ -183,8 +230,8 @@ sys_job_test2
 	if (! dat::nearlyEquals(gotCount, expCount))
 	{
 		oss << "Failure of factory jobSlow count test" << std::endl;
-		oss << dat::infoString(expCount, "expCount") << std::endl;
-		oss << dat::infoString(gotCount, "gotCount") << std::endl;
+		oss << io::infoString(expCount, "expCount") << std::endl;
+		oss << io::infoString(gotCount, "gotCount") << std::endl;
 	}
 
 	return oss.str();
@@ -211,7 +258,7 @@ main
 	std::string const errMessages(oss.str());
 	if (! errMessages.empty())
 	{
-		io::err() << errMessages << std::endl;
+		std::cerr << errMessages << std::endl;
 		return 1;
 	}
 	return 0;

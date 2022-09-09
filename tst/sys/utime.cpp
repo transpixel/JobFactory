@@ -33,8 +33,6 @@
 
 #include "libsys/time.h"
 
-#include "libio/stream.h"
-
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -128,7 +126,7 @@ main
 	std::string const errMessages(oss.str());
 	if (! errMessages.empty())
 	{
-		io::err() << errMessages << std::endl;
+		std::cerr << errMessages << std::endl;
 		return 1;
 	}
 	return 0;
