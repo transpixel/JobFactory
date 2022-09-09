@@ -50,6 +50,7 @@ class JobBase
 {
 public: // data
 
+	//! Identifier used (by infoString()) to report which job is this one
 	std::string const theJobName;
 
 public: // methods

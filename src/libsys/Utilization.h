@@ -31,6 +31,11 @@
 
 /*! \file
 \brief Declarations for sys::Utilization
+
+\par Example
+\dontinclude tst/sys/uUtilization.cpp
+\skip ExampleStart
+\until ExampleEnd
 */
 
 

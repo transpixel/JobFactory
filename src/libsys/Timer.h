@@ -46,8 +46,10 @@ namespace sys
 
 /*! \brief Simple timing support.
 
+*/
+/*
 \par Example
-\dontinclude testsys/uTimer.cpp
+\dontinclude tst/sys/uTimer.cpp
 \skip ExampleStart
 \until ExampleEnd
 */

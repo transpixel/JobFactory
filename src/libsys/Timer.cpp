@@ -42,6 +42,7 @@ namespace sys
 {
 //======================================================================
 
+//! Utility function to format string and value consistently
 inline
 std::string
 intervalString
@@ -55,6 +56,8 @@ intervalString
 	return oss.str();
 }
 
+//! Descriptive information about this instance
+inline
 std::string
 Timer::Interval :: infoString
 	( std::string const & title
