@@ -26,92 +26,91 @@
 //
 //
 
-#ifndef sys_JobBase_INCL_
-#define sys_JobBase_INCL_
+#ifndef sys_Utilization_INCL_
+#define sys_Utilization_INCL_
 
 /*! \file
-\brief Declarations for sys::JobBase
+\brief Declarations for sys::Utilization
+
+\par Example
+\dontinclude tst/uUtilization.cpp
+\skip ExampleStart
+\until ExampleEnd
 */
 
 
-#include <deque>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <thread>
-#include <vector>
+#include <cassert>
+#include <mutex>
 
 
 namespace sys
 {
 
-//! \brief Simple baseclass for functor-style processing jobs.
-class JobBase
+//! A thread-safe finite resource counter.
+class Utilization
 {
-public: // data
+	std::mutex theMutex{};
+	std::size_t const theMaxCount{};
+	std::size_t theCount{};
+	bool theIsValid{ false };
 
-	//! Identifier used (by infoString()) to report which job is this one
-	std::string const theJobName;
+private: // disable
+
+	//! Disable implicit copy and assignment
+	Utilization(Utilization const &) = delete;
+	Utilization & operator=(Utilization const &) = delete;
 
 public: // methods
 
-	//! Construct a job with given name
+	//! Configure to count relative to max value
+	inline
 	explicit
-	JobBase
-		( std::string const & jobName = std::string()
-		)
-		: theJobName(jobName)
-	{
-	}
+	Utilization
+		( std::size_t const & maxCount
+		);
 
-	//! Invoke implementation class's run() method
+	//! Check if instance is valid
+	bool
+	isValid
+		() const;
+
+	//! Increase current count (within a lock)
+	inline
 	void
-	operator()
-		() const
-	{
-		// io::out() << "===>:running job: " << theJobName << std::endl;
-		run();
-		done();
-	}
+	increase
+		();
+
+	//! Decrease current count (within a lock)
+	inline
+	void
+	decrease
+		();
+
+	//! True if nothing is in use (zero count)
+	inline
+	bool
+	isZero
+		();
+
+	//! True if current use is less than max allowed use
+	inline
+	bool
+	isIncomplete
+		();
 
 	//! Descriptive information about this instance.
 	std::string
 	infoString
 		( std::string const & title = std::string()
-		) const
-	{
-		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << title << " ";
-		}
-		oss << theJobName;
-		return oss.str();
-	}
-
-protected:
-
-	//! OVERRIDE this to perform job processing work
-	virtual
-	void
-	run
-		() const = 0;
-
-	//! OVERRIDE this to catch completion - default implementation is noop
-	virtual
-	void
-	done
-		() const
-	{
-		// io::out() << "===>:wrap up job: " << theJobName << std::endl;
-	}
+		) const;
 
 };
+
 
 }
 
 // Inline definitions
-// #include "libsys/JobBase.inl"
+#include "Utilization.inl"
 
-#endif // sys_JobBase_INCL_
+#endif // sys_Utilization_INCL_
 

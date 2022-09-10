@@ -1,21 +1,28 @@
-#
-# === CMake info
-#
+##
+## -- CMake build system description
+##
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
-set(TPQZcamVersion "0.1.4")
-# using
-set(EigenVersion "3.3")
+set(aProjName "JobFactory")
+set(aProjVersion "1.0.0")
 
 project(
-	TPQZcam
-	VERSION ${TPQZcamVersion}
-	LANGUAGES C CXX   # only C++ is used, but "C" for cmake to find pthreads
+	${aProjName}
+	VERSION ${aProjVersion}
+	DESCRIPTION "Job Factory for C++ parallel processing thread pools"
+	LANGUAGES CXX
 	)
 
-# general configuration / dependencies
-set(CMAKE_CXX_STANDARD 11)
+message("### CMAKE_MAJOR_VERSION: " ${CMAKE_MAJOR_VERSION})
+message("### CMAKE_MINOR_VERSION: " ${CMAKE_MINOR_VERSION})
+message("### CMAKE_PATCH_VERSION: " ${CMAKE_PATCH_VERSION})
+message("### CMAKE_TWEAK_VERSION: " ${CMAKE_TWEAK_VERSION})
+message("### PROJECT: " ${PROJECT})
+message("### PROJECT_VERSION: " ${PROJECT_VERSION})
+
+
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -28,97 +35,156 @@ set(BUILD_FLAGS_FOR_CLANG
 	)
 set(BUILD_FLAGS_FOR_GCC
 	#
-	# Disable
-	#	https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
-	#	https://gcc.gnu.org/gcc-7/changes.html (ref "On ARM...")
-	-Wno-psabi
-	#
-	-Wc++11-compat
 	-pthread
 	-fomit-frame-pointer
-	-Wextra
-	-Wuninitialized
-	-Winit-self
 	-fno-operator-names
 	-fstrict-enums
 	#
-	-pedantic-errors
-	-fno-nonansi-builtins
+	-Wc++11-compat
 	-Wall
+	-Wextra
+	-Wuninitialized
+	-Winit-self
+	-fno-nonansi-builtins
+	-pedantic-errors
+	#
+	-fmax-errors=1  # keep template error message generation under control
 	)
 set(BUILD_FLAGS_FOR_VISUAL
 	""
 	)
 
 
-# target_link_libraries(... ${CMAKE_THREAD_LIBS_INIT})
-#
-# === Upstream CMake configurations
-#
+#[[
+# general configuration
+# Note: can use target_compile_features() to customize for individual target
+add_compile_options(
+	-std=c++17
+	-pedantic
+	)
+#]]
 
-# External packages - {Eigen}
-find_package(Eigen3 ${EigenVersion} REQUIRED NO_MODULE)
+##
+## -- Find dependency packages
+##
 
-find_package(Threads REQUIRED)
 
+##
+## -- configure packaging utilities
+##
 
-#
-# === Enable unit testing
-#
-
+# unit test capabilities
+# include and enable here for enable to be inherited by subdir tree
 include(CTest)
 enable_testing()
 
-#
-# === Configure project library
-#
+# Needs to be included first for use in subdir CMakeLists.txt files
+include(GNUInstallDirs) # creates/sets CMAKE_INSTALL_<dir>
 
-set(tpqzcam_LIBVERSION ${PROJECT_NAME}-${PROJECT_VERSION})
-set(local_LIBTARGET "TPQZcam-${PROJECT_VERSION}")
 
-# === GNU standard paths
-include(GNUInstallDirs)  # creates "CMAKE_INSTALL_<dir>"
+##
+## -- project source tree description
+##
 
+set(EXPORT_ALIAS_NAME ${aProjName}::${aProjName})
+set(EXPORT_TARGETS_NAME ${aProjName}Targets)
+set(EXPORT_FILENAME ${EXPORT_TARGETS_NAME}.cmake)
+message("### EXPORT_ALIAS_NAME: " ${EXPORT_ALIAS_NAME})
+message("### EXPORT_TARGETS_NAME: " ${EXPORT_TARGETS_NAME})
+message("### EXPORT_FILENAME: " ${EXPORT_FILENAME})
+
+
+## -- Inform CMake about project tree
 
 # Project source code
-add_subdirectory(src)
+add_subdirectory(src) # project source code
+add_subdirectory(include) # project library public interface (e.g. c++ headers)
 
-# Specify documentation generation
-## message("@@@@ - re-enable document processing")
-add_subdirectory(doc)
+# Documentation
+add_subdirectory(doc) # project reference documentation
 
+# Project test programs
+add_subdirectory(tst) # developer unit tests (check source code operation)
+#add_subdirectory(vnv) # use-case validation tests
 
-#
-# === Configure project unit tests
-#
+# Project examples
+#add_subdirectory(demos) # demonstration/example code
 
-add_subdirectory(tst)
-
-
-#
-# === CMake configuration for downstream builds
-#
+# Project applications
+## add_subdirectory(apps) # application utility programs
 
 
-#
-# === Distribution packages
-#
+# CMake configuration file packaging
+add_subdirectory(cmake) # generate .cmake files for downstream use
+
+##
+## -- CMake configuration utilities
+##
+
+set_property(
+	TARGET ${aProjName}
+	PROPERTY VERSION ${thisProject_VERSION}
+	)
+set_property(
+	TARGET ${aProjName}
+	PROPERTY VERSION INTERFACE_thisProject_MAJOR_VERSION 1
+	)
+set_property(
+	TARGET ${aProjName}
+	APPEND PROPERTY COMPATIBLE_INTERFACE_STRING thisProject_MAJOR_VERSION
+	)
+
+
+
+##
+## -- Distribution packages
+##
 
 # Override default install location for testing this package
 # In general default (no command here) will install to /usr/{lib,bin,...}
-# - but here, set package to isolated location for easier/safer testing
-## set (DEB_PACKAGE_ROOT "/tmp/local/${PROJECT_NAME}")
+# - but here, set package to sandbox location for easier/safer testing
+# set (DEB_PACKAGE_ROOT "/tmpLocal/${aProjName}")
 # - default is "/usr" (e.g. for system packages)
 # - specify explicitly as "/usr/local" as a developer local package
-set (DEB_PACKAGE_ROOT "/usr/local/")
+# - extract from command line
+set (DEB_PACKAGE_ROOT "${CMAKE_INSTALL_PREFIX}")
 set(CPACK_PACKAGING_INSTALL_PREFIX "${DEB_PACKAGE_ROOT}")
 
 # list of packages to create (e.g. "DEB;RPM;...") if all tools installed
 set(CPACK_GENERATOR "DEB")
-include("${CMAKE_SOURCE_DIR}/cmake/cmakePack.cmake")
 
-# Must be included after the package variables are set
-include(CPack)
+
+#
+# === Distribution package creation
+#
+
+	set(thisProject_PACKAGE_VENDOR "https://host.domain.tld")
+	set(thisProject_PACKAGE_MAINTAINER "https://host.domain.tld")
+
+	# Specify generic cross-package distribuation properties
+	# set(CPACK_PACKAGE_NAME ${aProjName}) # same as default
+	set(CPACK_PACKAGE_VENDOR "${thisProject_PACKAGE_VENDOR}")
+	set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+	set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+	set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+	set(CPACK_PACKAGE_VERSION_TWEAK ${PROJECT_VERSION_TWEAK})
+
+
+	# == Debian package
+
+		set(CPACK_PACKAGING_INSTALL_PREFIX "${DEB_PACKAGE_ROOT}")
+		# Set package(Generator) specific characteristics
+		set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${thisProject_PACKAGE_MAINTAINER}")
+		# -- deps: none for thisProject
+		#	set(APT_PACKAGE_DEPLIST
+		#	"libeigen3-dev (>= ${EigenVersion}) \
+		#	"
+		#	)
+		# set(CPACK_DEBIAN_PACKAGE_DEPENDS ${APT_PACKAGE_DEPLIST})
+
+
+	# Must be included after the package variables are set
+	include(CPack)
 
 message("###")
 message("### CMAKE_INSTALL_LIBDIR: " ${CMAKE_INSTALL_LIBDIR})
@@ -133,4 +199,5 @@ message("### CMAKE_INSTALL_FULL_DOCDIR: " ${CMAKE_INSTALL_FULL_DOCDIR})
 message("###")
 message("### DEB_PACKAGE_ROOT: " ${DEB_PACKAGE_ROOT})
 message("###")
+
 

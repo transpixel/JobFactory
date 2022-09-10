@@ -28,31 +28,28 @@
 
 
 /*! \file
-\brief Definitions for sys::jobCapacity
+\brief Definitions for sys::Utilization
 */
 
 
-#include "libsys/jobCapacity.h"
+#include "Utilization.h"
 
+#include <iomanip>
 #include <sstream>
 
 
 namespace sys
 {
-namespace job
-{
 
 bool
-Capacity :: isValid
+Utilization :: isValid
 	() const
 {
-	return
-		(  theUtilization.isValid()
-		);
+	return theIsValid;
 }
 
 std::string
-Capacity :: infoString
+Utilization :: infoString
 	( std::string const & title
 	) const
 {
@@ -63,9 +60,12 @@ Capacity :: infoString
 	}
 	if (isValid())
 	{
-		oss 
-			<< "cap.use:"
-			<< " " << theUtilization.infoString()
+		static std::string const fmt{ "%2d" };
+		constexpr std::size_t fw{ 6u };
+		oss
+			<< "cnt,max:"
+			<< " " << std::setw(fw) << theCount
+			<< " " << std::setw(fw) << theMaxCount
 			;
 	}
 	else
@@ -75,6 +75,5 @@ Capacity :: infoString
 	return oss.str();
 }
 
-}
 }
 

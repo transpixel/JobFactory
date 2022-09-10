@@ -30,7 +30,7 @@
 \brief  This file contains unit test for sys::Utilization
 */
 
-#include "libsys/Utilization.h"
+#include "Utilization.h"
 
 #include <iostream>
 #include <limits>

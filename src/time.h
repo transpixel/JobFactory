@@ -26,91 +26,37 @@
 //
 //
 
-#ifndef sys_Utilization_INCL_
-#define sys_Utilization_INCL_
+#ifndef sys_time_INCL_
+#define sys_time_INCL_
 
 /*! \file
-\brief Declarations for sys::Utilization
-
-\par Example
-\dontinclude tst/sys/uUtilization.cpp
-\skip ExampleStart
-\until ExampleEnd
+\brief Declarations for sys::time
 */
-
-
-#include <cassert>
-#include <mutex>
 
 
 namespace sys
 {
 
-//! A thread-safe finite resource counter.
-class Utilization
+//! \brief Functions related to system time and timing operations.
+namespace time
 {
-	std::mutex theMutex{};
-	std::size_t const theMaxCount{};
-	std::size_t theCount{};
-	bool theIsValid{ false };
-
-private: // disable
-
-	//! Disable implicit copy and assignment
-	Utilization(Utilization const &) = delete;
-	Utilization & operator=(Utilization const &) = delete;
-
-public: // methods
-
-	//! Configure to count relative to max value
+	//! System time (via chronos)
 	inline
-	explicit
-	Utilization
-		( std::size_t const & maxCount
-		);
-
-	//! Check if instance is valid
-	bool
-	isValid
-		() const;
-
-	//! Increase current count (within a lock)
-	inline
-	void
-	increase
+	double
+	now
 		();
 
-	//! Decrease current count (within a lock)
+	//! System time - relative to first time called!
 	inline
-	void
-	decrease
+	double
+	relativeNow
 		();
-
-	//! True if nothing is in use (zero count)
-	inline
-	bool
-	isZero
-		();
-
-	//! True if current use is less than max allowed use
-	inline
-	bool
-	isIncomplete
-		();
-
-	//! Descriptive information about this instance.
-	std::string
-	infoString
-		( std::string const & title = std::string()
-		) const;
-
-};
-
+}
 
 }
 
 // Inline definitions
-#include "libsys/Utilization.inl"
+#include "time.inl"
 
-#endif // sys_Utilization_INCL_
+#endif // sys_time_INCL_
 

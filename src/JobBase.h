@@ -26,64 +26,92 @@
 //
 //
 
-#ifndef sys_jobNotification_INCL_
-#define sys_jobNotification_INCL_
+#ifndef sys_JobBase_INCL_
+#define sys_JobBase_INCL_
 
 /*! \file
-\brief Declarations for sys::jobNotification
+\brief Declarations for sys::JobBase
 */
 
 
-#include <condition_variable>
-#include <mutex>
+#include <deque>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <thread>
+#include <vector>
 
 
 namespace sys
 {
 
-//! Structures and functions for concurrent job processing.
-namespace job
+//! \brief Simple baseclass for functor-style processing jobs.
+class JobBase
 {
+public: // data
 
-//! Condition variable synchronization
-class Notification
-{
-	std::mutex theMutex{};
-	std::condition_variable theCond{};
-	bool theIsReal{ false };
-
-private: // disable
-
-	//! Disable implicit copy and assignment
-	Notification(Notification const &) = delete;
-	Notification & operator=(Notification const &) = delete;
+	//! Identifier used (by infoString()) to report which job is this one
+	std::string const theJobName;
 
 public: // methods
 
-	//! Create a vanilla notifier
-	Notification
-		() = default;
+	//! Construct a job with given name
+	explicit
+	JobBase
+		( std::string const & jobName = std::string()
+		)
+		: theJobName(jobName)
+	{
+	}
 
-	//! Suspend calling thread until condition is set (by other thread)
-	inline
+	//! Invoke implementation class's run() method
 	void
-	waitFor
-		();
+	operator()
+		() const
+	{
+		// io::out() << "===>:running job: " << theJobName << std::endl;
+		run();
+		done();
+	}
 
-	//! Set condition and notify other (all) threads of the change
-	inline
+	//! Descriptive information about this instance.
+	std::string
+	infoString
+		( std::string const & title = std::string()
+		) const
+	{
+		std::ostringstream oss;
+		if (! title.empty())
+		{
+			oss << title << " ";
+		}
+		oss << theJobName;
+		return oss.str();
+	}
+
+protected:
+
+	//! OVERRIDE this to perform job processing work
+	virtual
 	void
-	issue
-		();
+	run
+		() const = 0;
+
+	//! OVERRIDE this to catch completion - default implementation is noop
+	virtual
+	void
+	done
+		() const
+	{
+		// io::out() << "===>:wrap up job: " << theJobName << std::endl;
+	}
 
 };
 
 }
-}
 
 // Inline definitions
-#include "libsys/jobNotification.inl"
+// #include "JobBase.inl"
 
-#endif // sys_jobNotification_INCL_
+#endif // sys_JobBase_INCL_
 

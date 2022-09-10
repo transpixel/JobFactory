@@ -26,30 +26,55 @@
 //
 //
 
-#ifndef sys_job_INCL_
-#define sys_job_INCL_
 
 /*! \file
-\brief Declarations for sys::job
+\brief Definitions for sys::jobCapacity
 */
 
 
-#include "libsys/jobNotification.h"
-#include "libsys/jobCapacity.h"
-#include "libsys/jobFactory.h"
+#include "jobCapacity.h"
+
+#include <sstream>
+
 
 namespace sys
 {
-
-//! Structures and functions for concurrent job processing.
 namespace job
 {
 
-}
+bool
+Capacity :: isValid
+	() const
+{
+	return
+		(  theUtilization.isValid()
+		);
 }
 
-// Inline definitions
-// #include "libsys/job.inl"
+std::string
+Capacity :: infoString
+	( std::string const & title
+	) const
+{
+	std::ostringstream oss;
+	if (! title.empty())
+	{
+		oss << title << " ";
+	}
+	if (isValid())
+	{
+		oss 
+			<< "cap.use:"
+			<< " " << theUtilization.infoString()
+			;
+	}
+	else
+	{
+		oss << " <null>";
+	}
+	return oss.str();
+}
 
-#endif // sys_job_INCL_
+}
+}
 

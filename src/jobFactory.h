@@ -34,10 +34,10 @@
 */
 
 
-#include "libsys/GhostTown.h"
-#include "libsys/JobBase.h"
-#include "libsys/jobCapacity.h"
-#include "libsys/Utilization.h"
+#include "GhostTown.h"
+#include "JobBase.h"
+#include "jobCapacity.h"
+#include "Utilization.h"
 
 #include <memory>
 #include <thread>
@@ -146,7 +146,7 @@ private:
 }
 
 // Inline definitions
-#include "libsys/jobFactory.inl"
+#include "jobFactory.inl"
 
 #endif // sys_jobFactory_INCL_
 

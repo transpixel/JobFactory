@@ -2,7 +2,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017 Stellacore Corporation.
+// Copyright (c) 2020 Stellacore Corporation.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -26,23 +26,69 @@
 //
 //
 
+#ifndef sys_GhostTown_INCL_
+#define sys_GhostTown_INCL_
+
 /*! \file
-\brief Declarations for namespace sys
+\brief Declarations for sys::GhostTown
 */
 
-/*! \brief Declarations and Definitions for libsys.
 
-\par General Concept:
-
-System level generic operations (primarily multi-threading support).
-
-\par Special Notes:
-
-+ parallel processing baseclass and simple processing job pool
+#include <mutex>
+#include <set>
 
 
-*/
 namespace sys
 {
-}
+
+/*! \brief Mutex guarded set of identifiers.
+*/
+class GhostTown
+{
+	//! Guarded access
+	std::mutex theMutex{};
+
+	//! Arbitrary identifiers
+	std::set<std::size_t> theIds{};
+
+private: // disable
+
+	//! Disable implicit copy and assignment
+	GhostTown(GhostTown const &) = delete;
+	GhostTown & operator=(GhostTown const &) = delete;
+
+public: // methods
+
+	//! Construct with empty collection of Ids.
+	GhostTown
+		() = default;
+
+	//! (Atomically) add ghost Id to set
+	inline
+	void
+	createGhost
+		( std::size_t const & id
+		);
+
+	//! Copy of all current ghost IDs
+	inline
+	std::set<std::size_t>
+	allGhosts
+		();
+
+	//! (Atomically) erase ghost Id to set
+	inline
+	void
+	removeGhost
+		( std::size_t const & id
+		);
+
+}; // GhostTown
+
+} // sys
+
+// Inline definitions
+#include "GhostTown.inl"
+
+#endif // sys_GhostTown_INCL_
 

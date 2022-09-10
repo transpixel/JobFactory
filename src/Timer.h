@@ -26,92 +26,117 @@
 //
 //
 
-#ifndef sys_jobCapacity_INCL_
-#define sys_jobCapacity_INCL_
+#ifndef sys_Timer_INCL_
+#define sys_Timer_INCL_
 
 /*! \file
-\brief Declarations for sys::jobCapacity
+\brief Declarations for sys::Timer
 */
 
 
-#include "libsys/Utilization.h"
-#include "libsys/jobNotification.h"
+#include "time.h"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 
 namespace sys
 {
-namespace job
+
+/*! \brief Simple timing support.
+
+*/
+/*
+\par Example
+\dontinclude tst/sys/uTimer.cpp
+\skip ExampleStart
+\until ExampleEnd
+*/
+
+class Timer
 {
+	//! Information about one timing interval
+	struct Interval
+	{
+		double theStart;
+		double theStop;
+		std::string theInfo;
 
-//! Track usage (of whatever) with notification on changes
-class Capacity
-{
-	Utilization theUtilization;
-	Notification theNotification;
+		//! Value ctor
+		inline
+		explicit
+		Interval
+			( std::string const & info
+			);
 
-private: // disable
+		//! True if this instance is complete (has been stop'ed)
+		bool
+		isDone
+			() const;
 
-	//! Disable implicit copy and assignment
-	Capacity(Capacity const &) = delete;
-	Capacity & operator=(Capacity const &) = delete;
+		//! Set end time
+		inline
+		void
+		stop
+			();
+
+		//! Elapsed time
+		inline
+		double
+		duration
+			() const;
+
+		//! Descriptive information about this instance
+		std::string
+		infoString
+			( std::string const & title = std::string()
+			) const;
+	};
+
+	std::vector<Interval> theIntervals;
+	bool theTimerIsActive;
 
 public: // methods
 
-	//! Construct with tracking up to maxCount number
+	//! Create a timer - which is stopped.
 	inline
-	explicit
-	Capacity
-		( std::size_t const & maxCount
+	Timer
+		();
+
+	// copy constructor -- compiler provided
+	// assignment operator -- compiler provided
+	// destructor -- compiler provided
+
+	//! Start timing an interval - ends previous
+	inline
+	void
+	start
+		( std::string const & iName = std::string()
 		);
 
-	//! Check if instance is valid
-	bool
-	isValid
+	//! End timing an interval
+	inline
+	void
+	stop
+		();
+
+	//! Sum of all intervals
+	double
+	total
 		() const;
-
-	//! True when at least one resource is in use
-	inline
-	bool
-	isInUse
-		();
-
-	//! True when utilization is less than capacity
-	inline
-	bool
-	hasVacancy
-		();
-
-	//! Increase the usage count
-	inline
-	void
-	consume
-		();
-
-	//! Decrement the usage count
-	inline
-	void
-	release
-		();
-
-	//! Stop calling thread until utilization state changes
-	inline
-	void
-	waitForVacancy
-		();
 
 	//! Descriptive information about this instance.
 	std::string
 	infoString
 		( std::string const & title = std::string()
 		) const;
-
 };
 
 }
-}
 
 // Inline definitions
-#include "libsys/jobCapacity.inl"
+#include "Timer.inl"
 
-#endif // sys_jobCapacity_INCL_
+#endif // sys_Timer_INCL_
 

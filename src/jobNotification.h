@@ -26,54 +26,64 @@
 //
 //
 
+#ifndef sys_jobNotification_INCL_
+#define sys_jobNotification_INCL_
 
 /*! \file
-\brief Definitions for sys::Utilization
+\brief Declarations for sys::jobNotification
 */
 
 
-#include "libsys/Utilization.h"
-
-#include <iomanip>
-#include <sstream>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 
 namespace sys
 {
 
-bool
-Utilization :: isValid
-	() const
+//! Structures and functions for concurrent job processing.
+namespace job
 {
-	return theIsValid;
+
+//! Condition variable synchronization
+class Notification
+{
+	std::mutex theMutex{};
+	std::condition_variable theCond{};
+	bool theIsReal{ false };
+
+private: // disable
+
+	//! Disable implicit copy and assignment
+	Notification(Notification const &) = delete;
+	Notification & operator=(Notification const &) = delete;
+
+public: // methods
+
+	//! Create a vanilla notifier
+	Notification
+		() = default;
+
+	//! Suspend calling thread until condition is set (by other thread)
+	inline
+	void
+	waitFor
+		();
+
+	//! Set condition and notify other (all) threads of the change
+	inline
+	void
+	issue
+		();
+
+};
+
+}
 }
 
-std::string
-Utilization :: infoString
-	( std::string const & title
-	) const
-{
-	std::ostringstream oss;
-	if (! title.empty())
-	{
-		oss << title << " ";
-	}
-	if (isValid())
-	{
-		static std::string const fmt{ "%2d" };
-		constexpr std::size_t fw{ 6u };
-		oss
-			<< "cnt,max:"
-			<< " " << std::setw(fw) << theCount
-			<< " " << std::setw(fw) << theMaxCount
-			;
-	}
-	else
-	{
-		oss << " <null>";
-	}
-	return oss.str();
-}
+// Inline definitions
+#include "jobNotification.inl"
 
-}
+#endif // sys_jobNotification_INCL_
 

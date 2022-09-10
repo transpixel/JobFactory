@@ -26,70 +26,30 @@
 //
 //
 
+#ifndef sys_job_INCL_
+#define sys_job_INCL_
 
 /*! \file
-\brief Definitions for sys::jobFactory
+\brief Declarations for sys::job
 */
 
 
-#include "libsys/jobFactory.h"
-
-#include <iomanip>
-#include <sstream>
-
+#include "jobNotification.h"
+#include "jobCapacity.h"
+#include "jobFactory.h"
 
 namespace sys
 {
+
+//! Structures and functions for concurrent job processing.
 namespace job
 {
 
-bool
-Factory :: isValid
-	() const
-{
-	return theCapacity.isValid();
-}
-
-std::string
-Factory :: infoString
-	( std::string const & title
-	) const
-{
-	std::ostringstream oss;
-	if (! title.empty())
-	{
-		oss << title << std::endl;
-	}
-	if (isValid())
-	{
-		static std::string pre{ "..." };
-		oss << pre
-			<< "theCapacity:"
-			<< theCapacity.infoString();
-
-		constexpr std::size_t fw{ 6u };
-		oss << std::endl;
-		oss << pre
-			<< "numJobs:"
-			<< " " << std::setw(fw) << theJobs.size();
-
-		oss << std::endl;
-		oss << pre
-			<< "theJobNdx:"
-			<< " " << std::setw(fw) << theJobNdx;
-
-		oss << std::endl;
-		oss << pre
-			<< "numThreads:"
-			<< " " << std::setw(fw) << theThreads.size();
-	}
-	else
-	{
-		oss << " <null>";
-	}
-	return oss.str();
-}
-
 }
 }
+
+// Inline definitions
+// #include "job.inl"
+
+#endif // sys_job_INCL_
 

@@ -26,37 +26,70 @@
 //
 //
 
-#ifndef sys_time_INCL_
-#define sys_time_INCL_
 
 /*! \file
-\brief Declarations for sys::time
+\brief Definitions for sys::jobFactory
 */
+
+
+#include "jobFactory.h"
+
+#include <iomanip>
+#include <sstream>
 
 
 namespace sys
 {
-
-//! \brief Functions related to system time and timing operations.
-namespace time
+namespace job
 {
-	//! System time (via chronos)
-	inline
-	double
-	now
-		();
 
-	//! System time - relative to first time called!
-	inline
-	double
-	relativeNow
-		();
+bool
+Factory :: isValid
+	() const
+{
+	return theCapacity.isValid();
+}
+
+std::string
+Factory :: infoString
+	( std::string const & title
+	) const
+{
+	std::ostringstream oss;
+	if (! title.empty())
+	{
+		oss << title << std::endl;
+	}
+	if (isValid())
+	{
+		static std::string pre{ "..." };
+		oss << pre
+			<< "theCapacity:"
+			<< theCapacity.infoString();
+
+		constexpr std::size_t fw{ 6u };
+		oss << std::endl;
+		oss << pre
+			<< "numJobs:"
+			<< " " << std::setw(fw) << theJobs.size();
+
+		oss << std::endl;
+		oss << pre
+			<< "theJobNdx:"
+			<< " " << std::setw(fw) << theJobNdx;
+
+		oss << std::endl;
+		oss << pre
+			<< "numThreads:"
+			<< " " << std::setw(fw) << theThreads.size();
+	}
+	else
+	{
+		oss << " <null>";
+	}
+	return oss.str();
 }
 
 }
-
-// Inline definitions
-#include "libsys/time.inl"
-
-#endif // sys_time_INCL_
+}
 
