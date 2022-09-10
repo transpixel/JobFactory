@@ -11,7 +11,7 @@ project(
 	${aProjName}
 	VERSION ${aProjVersion}
 	DESCRIPTION "Job Factory for C++ parallel processing thread pools"
-	LANGUAGES CXX
+	LANGUAGES C CXX  # only C++ is used, but "C" for cmake to find pthreads
 	)
 
 message("### CMAKE_MAJOR_VERSION: " ${CMAKE_MAJOR_VERSION})
@@ -35,7 +35,14 @@ set(BUILD_FLAGS_FOR_CLANG
 	)
 set(BUILD_FLAGS_FOR_GCC
 	#
+	# Disable
+	#	https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
+	#	https://gcc.gnu.org/gcc-7/changes.html (ref "On ARM...")
+	-Wno-psabi
+	#
+	-Wc++11-compat
 	-pthread
+	#
 	-fomit-frame-pointer
 	-fno-operator-names
 	-fstrict-enums
@@ -68,6 +75,7 @@ add_compile_options(
 ## -- Find dependency packages
 ##
 
+find_package(Threads REQUIRED)
 
 ##
 ## -- configure packaging utilities

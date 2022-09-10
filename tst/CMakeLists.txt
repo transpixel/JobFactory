@@ -2,7 +2,9 @@
 # Inventory of test programs
 set(thisProjTests
 
-	# TODO
+	ujob
+	utime
+	uUtilization
 
 	)
 
@@ -35,8 +37,8 @@ foreach (thisProjTest ${thisProjTests})
 	target_link_libraries(
 		${thisProjTest}
 		PRIVATE
-		${aProjName}::${aProjName}
-			engabra::engabra
+			Threads::Threads
+			${aProjName}::${aProjName}
 		)
 
 endforeach()
